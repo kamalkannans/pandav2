@@ -21,10 +21,16 @@ const Onboarding: React.FC = () => {
     setError('');
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        throw sessionError;
+      }
+
+      const user = session?.user;
       
       if (!user) {
-        throw new Error('No authenticated user found');
+        throw new Error('No authenticated user found. Please sign in again.');
       }
 
       const { error: profileError } = await supabase
@@ -44,7 +50,7 @@ const Onboarding: React.FC = () => {
       navigate('/dashboard');
     } catch (err) {
       console.error('Failed to save onboarding data:', err);
-      setError('Failed to save your information. Please try again.');
+      setError(err instanceof Error ? err.message : 'Failed to save your information. Please try again.');
     }
 
     setLoading(false);
