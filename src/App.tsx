@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Features from './components/Features';
@@ -17,30 +19,40 @@ import Dashboard from './components/dashboard/Dashboard';
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen">
-        <Header />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/dashboard/*" element={<Dashboard />} />
-          <Route path="/" element={
-            <main>
-              <Hero />
-              <Features />
-              <Workflow />
-              <Testimonials />
-              <Pricing />
-              <FAQ />
-              <CTA />
-            </main>
-          } />
-        </Routes>
-        <Footer />
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className="min-h-screen">
+          <Header />
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/onboarding" element={
+              <ProtectedRoute>
+                <Onboarding />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/*" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/" element={
+              <main>
+                <Hero />
+                <Features />
+                <Workflow />
+                <Testimonials />
+                <Pricing />
+                <FAQ />
+                <CTA />
+              </main>
+            } />
+          </Routes>
+          <Footer />
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 
