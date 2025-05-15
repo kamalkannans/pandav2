@@ -26,7 +26,7 @@ const Signup: React.FC = () => {
     try {
       // TODO: Implement Supabase authentication
       console.log('Signup with:', name, email, password);
-      navigate('/dashboard');
+      navigate('/onboarding');
     } catch (err) {
       setError('Failed to create an account. Please try again.');
     }
