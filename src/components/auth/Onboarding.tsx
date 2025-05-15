@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, User, Video } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 type AccountType = 'individual' | 'agency';
 
@@ -11,23 +12,39 @@ const Onboarding: React.FC = () => {
   const [organizationName, setOrganizationName] = useState('');
   const [episodesPerMonth, setEpisodesPerMonth] = useState<string>('1-2');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     try {
-      // TODO: Save onboarding data to Supabase
-      console.log('Onboarding data:', {
-        accountType,
-        name,
-        organizationName,
-        episodesPerMonth
-      });
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('No authenticated user found');
+      }
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          account_type: accountType,
+          full_name: accountType === 'individual' ? name : null,
+          organization_name: accountType === 'agency' ? organizationName : null,
+          episodes_per_month: episodesPerMonth
+        });
+
+      if (profileError) {
+        throw profileError;
+      }
+
       navigate('/dashboard');
     } catch (err) {
       console.error('Failed to save onboarding data:', err);
+      setError('Failed to save your information. Please try again.');
     }
 
     setLoading(false);
@@ -49,6 +66,12 @@ const Onboarding: React.FC = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {error && (
+            <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {step === 1 && (
               <div>
