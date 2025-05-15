@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Video, Mail, AlertCircle, ArrowLeft } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 import AuthHeader from './AuthHeader';
 
 const ForgotPassword: React.FC = () => {
@@ -16,11 +17,15 @@ const ForgotPassword: React.FC = () => {
     setLoading(true);
 
     try {
-      // TODO: Implement Supabase password reset
-      console.log('Reset password for:', email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
       setSuccess(true);
     } catch (err) {
       setError('Failed to send reset email. Please try again.');
+      console.error('Password reset error:', err);
     }
 
     setLoading(false);

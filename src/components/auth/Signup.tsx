@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Video, Mail, Lock, User, AlertCircle } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 import AuthHeader from './AuthHeader';
 
 const Signup: React.FC = () => {
@@ -24,11 +25,24 @@ const Signup: React.FC = () => {
     setLoading(true);
 
     try {
-      // TODO: Implement Supabase authentication
-      console.log('Signup with:', name, email, password);
-      navigate('/onboarding');
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.user) {
+        navigate('/onboarding');
+      }
     } catch (err) {
       setError('Failed to create an account. Please try again.');
+      console.error('Signup error:', err);
     }
 
     setLoading(false);

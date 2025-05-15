@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Video, Mail, Lock, AlertCircle } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 import AuthHeader from './AuthHeader';
 
 const Login: React.FC = () => {
@@ -16,11 +17,19 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      // TODO: Implement Supabase authentication
-      console.log('Login with:', email, password);
-      navigate('/dashboard');
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      if (data?.user) {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setError('Failed to log in. Please check your credentials.');
+      console.error('Login error:', err);
     }
 
     setLoading(false);
