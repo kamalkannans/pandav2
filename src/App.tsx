@@ -15,7 +15,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen">
+        <div className="min-h-screen flex flex-col">
           <Header />
           <Routes>
             <Route path="/login" element={<Login />} />
